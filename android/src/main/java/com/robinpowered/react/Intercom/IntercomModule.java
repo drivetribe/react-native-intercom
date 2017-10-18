@@ -19,12 +19,16 @@ import java.util.Map;
 import javax.annotation.Nullable;
 
 import io.intercom.android.sdk.Intercom;
+import io.intercom.android.sdk.UserAttributes;
 import io.intercom.android.sdk.identity.Registration;
+import io.intercom.android.sdk.push.IntercomPushClient;
 
 public class IntercomModule extends ReactContextBaseJavaModule {
 
     private static final String MODULE_NAME = "IntercomWrapper";
     public static final String TAG = "Intercom";
+
+    private final IntercomPushClient intercomPushClient = new IntercomPushClient();
 
     public IntercomModule(ReactApplicationContext reactContext) {
         super(reactContext);
@@ -56,6 +60,17 @@ public class IntercomModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
+    public void sendTokenToIntercom(String token, Callback callback) {
+        if (getCurrentActivity() != null) {
+            intercomPushClient.sendTokenToIntercom(getCurrentActivity().getApplication(), token);
+            Log.i(TAG, "sendTokenToIntercom");
+            callback.invoke(null, null);
+        } else {
+            Log.e(TAG, "sendTokenToIntercom; getCurrentActivity() is null");
+        }
+    }
+
+    @ReactMethod
     public void registerUnidentifiedUser(Callback callback) {
         Intercom.client().registerUnidentifiedUser();
         Log.i(TAG, "registerUnidentifiedUser");
@@ -74,8 +89,8 @@ public class IntercomModule extends ReactContextBaseJavaModule {
     @ReactMethod
     public void updateUser(ReadableMap options, Callback callback) {
         try {
-            Map<String, Object> map = recursivelyDeconstructReadableMap(options);
-            Intercom.client().updateUser(map);
+            UserAttributes userAttributes = convertToUserAttributes(options);
+            Intercom.client().updateUser(userAttributes);
             Log.i(TAG, "updateUser");
             callback.invoke(null, null);
         } catch (Exception e) {
@@ -196,6 +211,23 @@ public class IntercomModule extends ReactContextBaseJavaModule {
             callback.invoke(ex.toString());
         }
     }
+    
+    @ReactMethod
+    public void setBottomPadding( Integer padding, Callback callback) {
+         Intercom.client().setBottomPadding(padding);
+         Log.i(TAG, "setBottomPadding");
+         callback.invoke(null, null);
+    }
+
+    private UserAttributes convertToUserAttributes(ReadableMap readableMap) {
+        Map<String, Object> map = recursivelyDeconstructReadableMap(readableMap);
+        UserAttributes.Builder builder = new UserAttributes.Builder();
+        for (Map.Entry<String, Object> entry : map.entrySet()) {
+            builder.withCustomAttribute(entry.getKey(), entry.getValue());
+        }
+        return builder.build();
+    }
+
 
     private Map<String, Object> recursivelyDeconstructReadableMap(ReadableMap readableMap) {
         ReadableMapKeySetIterator iterator = readableMap.keySetIterator();
