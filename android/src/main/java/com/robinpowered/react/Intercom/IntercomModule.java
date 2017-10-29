@@ -26,7 +26,7 @@ import io.intercom.android.sdk.push.IntercomPushClient;
 public class IntercomModule extends ReactContextBaseJavaModule {
 
     private static final String MODULE_NAME = "IntercomWrapper";
-    public static final String TAG = "Intercom";
+    private static final String TAG = "Intercom";
 
     private final IntercomPushClient intercomPushClient = new IntercomPushClient();
 
@@ -150,12 +150,6 @@ public class IntercomModule extends ReactContextBaseJavaModule {
     @ReactMethod
     public void setUserHash(String userHash, Callback callback) {
         Intercom.client().setUserHash(userHash);
-        callback.invoke(null, null);
-    }
-
-    @ReactMethod
-    public void setHMAC(String hmac, String data, Callback callback) {
-        Intercom.client().setSecureMode(hmac, data);
         callback.invoke(null, null);
     }
 
