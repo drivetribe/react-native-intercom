@@ -74,11 +74,7 @@ RCT_EXPORT_METHOD(reset:(RCTResponseSenderBlock)callback) {
 RCT_EXPORT_METHOD(updateUser:(NSDictionary*)options callback:(RCTResponseSenderBlock)callback) {
     NSLog(@"updateUser with %@", options);
     NSDictionary* attributes = options;
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdeprecated-declarations"
-    // TODO: use updateUser:
-    [Intercom updateUserWithAttributes:attributes];
-#pragma clang diagnostic pop
+    [Intercom updateUser:[IntercomUserAttributesBuilder userAttributesFromDictionary:attributes]];
     callback(@[[NSNull null]]);
 };
 
@@ -202,14 +198,16 @@ RCT_EXPORT_METHOD(setupAPN:(NSString*)deviceToken callback:(RCTResponseSenderBlo
 RCT_EXPORT_METHOD(registerForPush:(RCTResponseSenderBlock)callback) {
     NSLog(@"registerForPush");
 
-    UIApplication *application = [UIApplication sharedApplication];
-    [application registerUserNotificationSettings:
-     [UIUserNotificationSettings settingsForTypes:
-      (UIUserNotificationTypeBadge |
-       UIUserNotificationTypeSound |
-       UIUserNotificationTypeAlert)
-                                       categories:nil]];
-    [application registerForRemoteNotifications];
+    dispatch_async(dispatch_get_main_queue(), ^{
+        UIApplication *application = [UIApplication sharedApplication];
+        [application registerUserNotificationSettings:
+        [UIUserNotificationSettings settingsForTypes:
+        (UIUserNotificationTypeBadge |
+        UIUserNotificationTypeSound |
+        UIUserNotificationTypeAlert)
+                                        categories:nil]];
+        [application registerForRemoteNotifications];
+    });
 
     callback(@[[NSNull null]]);
 };
