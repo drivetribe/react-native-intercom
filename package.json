@@ -1,6 +1,6 @@
 {
   "name": "@drivetribe/react-native-intercom",
-  "version": "8.2.0",
+  "version": "8.3.0",
   "description": "A React Native client for Intercom.io",
   "main": "./lib/IntercomClient.js",
   "scripts": {
